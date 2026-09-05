@@ -86,7 +86,7 @@ app.use((req, res) => {
 
 // Option A: Directly paste your MongoDB Atlas URL here
 const MONGO_URI =
-  "mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/event_mngmt?retryWrites=true&w=majority";
+  "mongodb+srv://Megala:megala21@cluster0.nrxk7pd.mongodb.net/?appName=Cluster0";
 
 // Connect to MongoDB
 mongoose
