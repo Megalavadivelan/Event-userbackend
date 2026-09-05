@@ -1,7 +1,8 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
+
+const db = require("./src/database/config");
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
@@ -32,14 +33,14 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      // உங்கள் deployed frontend URL இங்கே add பண்ணலாம்
+      // Add your deployed frontend URL here
     ],
     credentials: true,
   })
 );
 
 // ========================================
-// PROFILE IMAGE STATIC FOLDER
+// STATIC FILES
 // ========================================
 
 app.use(
@@ -81,25 +82,19 @@ app.use((req, res) => {
 });
 
 // ========================================
-// MONGODB CONNECTION
+// DATABASE EVENTS
 // ========================================
 
-// Option A: Directly paste your MongoDB Atlas URL here
-const MONGO_URI =
-  "mongodb+srv://Megala:megala21@cluster0.nrxk7pd.mongodb.net/?appName=Cluster0";
+db.once("open", () => {
+  console.log("Database Connected");
+});
 
-// Connect to MongoDB
-mongoose
-  .connect(MONGO_URI)
-  .then(() => {
-    console.log("MongoDB Atlas connected successfully");
-  })
-  .catch((error) => {
-    console.error("MongoDB connection error:", error);
-  });
+db.on("error", (err) => {
+  console.error("Database Error:", err);
+});
 
 // ========================================
-// START SERVER (LOCAL ONLY)
+// START SERVER ONLY FOR LOCAL DEVELOPMENT
 // ========================================
 
 if (require.main === module) {
