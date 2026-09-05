@@ -1,35 +1,16 @@
-const ContactModel = require("../model/ContactModel");
+const {
+  sendContactMessageData,
+} = require("../service/ContactService");
 
 const sendContactMessage = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      subject,
-      message,
-      userId,
-    } = req.body;
+    const result = await sendContactMessageData(req.body);
 
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    if (result.success) {
+      return res.status(201).json(result);
     }
 
-    const contact = await ContactModel.create({
-      userId: userId || null,
-      name,
-      email,
-      subject,
-      message,
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: "Message sent successfully",
-      contact,
-    });
+    return res.status(400).json(result);
 
   } catch (error) {
     console.error(
