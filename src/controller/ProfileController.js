@@ -157,9 +157,7 @@ const uploadProfileImage = async (
       }
     }
 
-    const imagePath =
-      `/uploads/profile/${req.file.filename}`;
-
+    
     user.profileImage = imagePath;
 
     await user.save();

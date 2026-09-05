@@ -21,20 +21,15 @@ const {
 // CREATE UPLOAD FOLDER
 // ========================================
 
-const uploadDirectory =
-  path.join(
-    __dirname,
-    "../../uploads/profile"
-  );
 
-if (!fs.existsSync(uploadDirectory)) {
-  fs.mkdirSync(
-    uploadDirectory,
-    {
-      recursive: true,
-    }
-  );
-}
+// if (!fs.existsSync(uploadDirectory)) {
+//   fs.mkdirSync(
+//     uploadDirectory,
+//     {
+//       recursive: true,
+//     }
+//   );
+// }
 
 
 // ========================================

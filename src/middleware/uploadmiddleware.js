@@ -2,7 +2,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-const uploadPath = "uploads/profiles";
+
 
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath, {
