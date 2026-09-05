@@ -1,8 +1,10 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 
 const db = require("./src/database/config");
+
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
@@ -128,3 +130,17 @@ db.on("error", (err) => {
     err
   );
 });
+
+mongoose
+  .connect(
+    process.env.MONGO_URI
+  )
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.log("MongoDB connection error:", error);
+  });
+
+
+  module.exports = app;

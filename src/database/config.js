@@ -1,11 +1,14 @@
-
 const mongoose = require("mongoose");
-mongoose.connect("mongodb://localhost:27017/event_mngmt")
+
+const mongoURI = "mongodb+srv://Megala:megala21@cluster0.nrxk7pd.mongodb.net/?appName=Cluster0"
+
+mongoose
+  .connect(mongoURI)
   .then(() => {
-    console.log("DB connected successfully");
+    console.log("MongoDB Atlas connected successfully");
   })
   .catch((err) => {
-    console.log(err, "DB not connected");
+    console.error("MongoDB connection error:", err);
   });
 
 module.exports = mongoose.connection;
