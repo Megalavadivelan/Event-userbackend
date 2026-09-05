@@ -1,10 +1,8 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 
 const db = require("./src/database/config");
-
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
@@ -33,69 +31,42 @@ app.use(
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      // Add your deployed frontend URL here
+    ],
     credentials: true,
   })
 );
 
 // ========================================
-// PROFILE IMAGE STATIC FOLDER
+// STATIC FILES
 // ========================================
-
-// Allows frontend to access:
-// http://localhost:2005/uploads/profiles/filename.jpg
 
 app.use(
   "/uploads",
-  express.static(
-    path.join(__dirname, "uploads")
-  )
+  express.static(path.join(__dirname, "uploads"))
 );
 
 // ========================================
 // ROUTES
 // ========================================
 
-// Signup
-app.use(
-  "/signup",
-  SignupRouter
-);
-
-// Login
-app.use(
-  "/login",
-  LoginRouter
-);
-
-// Admin
-app.use(
-  "/admin",
-  AdminRouter
-);
-
-// Events
-app.use(
-  "/events",
-  EventRouter
-);
-
-// Profile
-app.use(
-  "/profile",
-  ProfileRouter
-);
-
+app.use("/signup", SignupRouter);
+app.use("/login", LoginRouter);
+app.use("/admin", AdminRouter);
+app.use("/events", EventRouter);
+app.use("/profile", ProfileRouter);
 app.use("/contact", ContactRouter);
+
 // ========================================
-// HOME / TEST ROUTE
+// HOME ROUTE
 // ========================================
 
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message:
-      "Event Management Backend is running",
+    message: "Event Management Backend is running",
   });
 });
 
@@ -111,36 +82,31 @@ app.use((req, res) => {
 });
 
 // ========================================
-// DATABASE CONNECTION
+// DATABASE EVENTS
 // ========================================
 
 db.once("open", () => {
   console.log("Database Connected");
-
-  app.listen(2005, () => {
-    console.log(
-      "Server running on port 2005"
-    );
-  });
 });
 
 db.on("error", (err) => {
-  console.log(
-    "Database Error:",
-    err
-  );
+  console.error("Database Error:", err);
 });
 
-mongoose
-  .connect(
-    process.env.MONGO_URI
-  )
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((error) => {
-    console.log("MongoDB connection error:", error);
+// ========================================
+// START SERVER ONLY FOR LOCAL DEVELOPMENT
+// ========================================
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 2005;
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+}
 
+// ========================================
+// EXPORT FOR VERCEL
+// ========================================
 
-  module.exports = app;
+module.exports = app;
