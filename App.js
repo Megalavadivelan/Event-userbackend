@@ -85,11 +85,9 @@ app.use((req, res) => {
 // ========================================
 // DATABASE EVENTS
 // ========================================
-
 mongoose
   .connect(
-    // process.env.MONGO_URI
-    "mongodb://localhost:27017"
+    process.env.MONGO_URI
   )
   .then(() => {
     console.log("MongoDB connected");
@@ -97,7 +95,6 @@ mongoose
   .catch((error) => {
     console.log("MongoDB connection error:", error);
   });
-
 // db.once("open", () => {
 //   console.log("Database Connected");
 // });
@@ -113,13 +110,13 @@ mongoose
 // if (require.main === module) {
 //   const PORT = process.env.PORT || 2005;
 
-  app.listen(5000, () => {
-    console.log(`Server running on port 5000`);
-  });
+  // app.listen(5000, () => {
+  //   console.log(`Server running on port 5000`);
+  // });
 // }
 
 // ========================================
 // EXPORT FOR VERCEL
 // ========================================
 
-// module.exports = app;
+module.exports = app;
