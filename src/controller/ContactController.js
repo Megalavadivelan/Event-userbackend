@@ -1,6 +1,6 @@
 const {
   sendContactMessageData,
-} = require("../service/ContactServices");
+} = require("../service/ContactService");
 
 const sendContactMessage = async (req, res) => {
   try {
@@ -20,7 +20,7 @@ const sendContactMessage = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Failed to send message",
+      message: error.message,
     });
   }
 };

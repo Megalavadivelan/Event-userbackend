@@ -10,10 +10,7 @@ const sendContactMessageData = async (body) => {
       userId,
     } = body;
 
-    // ========================================
-    // VALIDATE REQUIRED FIELDS
-    // ========================================
-
+    // Validate fields
     if (!name || !email || !subject || !message) {
       return {
         success: false,
@@ -21,10 +18,7 @@ const sendContactMessageData = async (body) => {
       };
     }
 
-    // ========================================
-    // CREATE CONTACT MESSAGE
-    // ========================================
-
+    // Save contact message
     const contact = await ContactModel.create({
       userId: userId || null,
       name,
@@ -40,7 +34,10 @@ const sendContactMessageData = async (body) => {
     };
 
   } catch (error) {
-    console.error("CONTACT SERVICE ERROR:", error);
+    console.error(
+      "CONTACT SERVICE ERROR:",
+      error
+    );
 
     throw error;
   }
