@@ -1,8 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const mongoose = require("mongoose")
 
-const db = require("./src/database/config");
+// const db = require("./src/database/config");
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
@@ -85,25 +86,36 @@ app.use((req, res) => {
 // DATABASE EVENTS
 // ========================================
 
-db.once("open", () => {
-  console.log("Database Connected");
-});
+mongoose
+  .connect(
+    process.env.MONGO_URI
+  )
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((error) => {
+    console.log("MongoDB connection error:", error);
+  });
 
-db.on("error", (err) => {
-  console.error("Database Error:", err);
-});
+// db.once("open", () => {
+//   console.log("Database Connected");
+// });
+
+// db.on("error", (err) => {
+//   console.error("Database Error:", err);
+// });
 
 // ========================================
 // START SERVER ONLY FOR LOCAL DEVELOPMENT
 // ========================================
 
-if (require.main === module) {
-  const PORT = process.env.PORT || 2005;
+// if (require.main === module) {
+//   const PORT = process.env.PORT || 2005;
 
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+//   app.listen(PORT, () => {
+//     console.log(`Server running on port ${PORT}`);
+//   });
+// }
 
 // ========================================
 // EXPORT FOR VERCEL
