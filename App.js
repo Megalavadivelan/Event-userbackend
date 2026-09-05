@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
+
 require("dotenv").config();
 
 const SignupRouter = require("./src/router/SignupRouter");
@@ -31,7 +32,7 @@ app.use(
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: true,
     credentials: true,
   })
 );
@@ -46,33 +47,69 @@ app.use(
 );
 
 // ========================================
-// MONGODB CONNECTION
+// MONGODB CONNECTION FUNCTION
 // ========================================
 
-const MONGO_URI = process.env.MONGO_URI;
+const connectDB = async () => {
+  try {
+    // Already connected
+    if (mongoose.connection.readyState === 1) {
+      return;
+    }
 
-if (!MONGO_URI) {
-  console.error("❌ MONGO_URI is not defined!");
-} else {
-  mongoose
-    .connect(MONGO_URI)
-    .then(() => {
-      console.log("✅ MongoDB connected successfully");
-    })
-    .catch((error) => {
-      console.error("❌ MongoDB connection error:", error.message);
+    const MONGO_URI = process.env.MONGO_URI;
+
+    if (!MONGO_URI) {
+      throw new Error("MONGO_URI is not defined");
+    }
+
+    await mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,
     });
-}
+
+    console.log("MongoDB connected successfully");
+
+  } catch (error) {
+    console.error(
+      "MongoDB connection error:",
+      error.message
+    );
+
+    throw error;
+  }
+};
+
+// ========================================
+// DATABASE CONNECTION MIDDLEWARE
+// ========================================
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Database connection failed",
+    });
+  }
+});
 
 // ========================================
 // ROUTES
 // ========================================
 
 app.use("/signup", SignupRouter);
+
 app.use("/login", LoginRouter);
+
 app.use("/admin", AdminRouter);
+
 app.use("/events", EventRouter);
+
 app.use("/profile", ProfileRouter);
+
 app.use("/contact", ContactRouter);
 
 // ========================================
