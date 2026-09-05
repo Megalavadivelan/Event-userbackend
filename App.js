@@ -1,9 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const mongoose = require("mongoose")
-
-// const db = require("./src/database/config");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
@@ -32,10 +31,7 @@ app.use(
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      // Add your deployed frontend URL here
-    ],
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -48,6 +44,25 @@ app.use(
   "/uploads",
   express.static(path.join(__dirname, "uploads"))
 );
+
+// ========================================
+// MONGODB CONNECTION
+// ========================================
+
+const MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+  console.error("❌ MONGO_URI is not defined!");
+} else {
+  mongoose
+    .connect(MONGO_URI)
+    .then(() => {
+      console.log("✅ MongoDB connected successfully");
+    })
+    .catch((error) => {
+      console.error("❌ MongoDB connection error:", error.message);
+    });
+}
 
 // ========================================
 // ROUTES
@@ -83,37 +98,16 @@ app.use((req, res) => {
 });
 
 // ========================================
-// DATABASE EVENTS
+// LOCAL SERVER
 // ========================================
-mongoose
-  .connect(
-    process.env.MONGO_URI
-  )
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((error) => {
-    console.log("MongoDB connection error:", error);
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 2005;
+
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
-// db.once("open", () => {
-//   console.log("Database Connected");
-// });
-
-// db.on("error", (err) => {
-//   console.error("Database Error:", err);
-// });
-
-// ========================================
-// START SERVER ONLY FOR LOCAL DEVELOPMENT
-// ========================================
-
-// if (require.main === module) {
-//   const PORT = process.env.PORT || 2005;
-
-  // app.listen(5000, () => {
-  //   console.log(`Server running on port 5000`);
-  // });
-// }
+}
 
 // ========================================
 // EXPORT FOR VERCEL
