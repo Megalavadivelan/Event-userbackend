@@ -30,12 +30,7 @@ const SignupSchema = new mongoose.Schema(
     phone: {
       type: String,
       default: "",
-    },
-
-    profileImage: {
-      type: String,
-      default: "",
-    },
+    }
   },
   {
     timestamps: true,

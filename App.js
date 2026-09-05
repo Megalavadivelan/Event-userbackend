@@ -88,7 +88,8 @@ app.use((req, res) => {
 
 mongoose
   .connect(
-    process.env.MONGO_URI
+    // process.env.MONGO_URI
+    "mongodb://localhost:27017"
   )
   .then(() => {
     console.log("MongoDB connected");
@@ -112,13 +113,13 @@ mongoose
 // if (require.main === module) {
 //   const PORT = process.env.PORT || 2005;
 
-//   app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-//   });
+  app.listen(5000, () => {
+    console.log(`Server running on port 5000`);
+  });
 // }
 
 // ========================================
 // EXPORT FOR VERCEL
 // ========================================
 
-module.exports = app;
+// module.exports = app;

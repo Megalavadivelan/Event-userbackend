@@ -2,94 +2,73 @@ const SignupModel = require("../model/SignupModel");
 
 const bcrypt = require("bcryptjs");
 
-const jwt = require("jsonwebtoken");
-
-const loginUserdata = async (body) => {
+const signupUserdata = async (body) => {
   try {
     // =========================
-    // GET LOGIN DATA
+    // GET SIGNUP DATA
     // =========================
 
-    const { email, password } = body;
+    const { name, email, password, phone } = body;
 
     // =========================
-    // CHECK FIELDS
+    // CHECK REQUIRED FIELDS
     // =========================
 
-    if (!email || !password) {
+    if (!name || !email || !password) {
       return {
         success: false,
-        message: "Email and Password are required",
+        message: "Name, Email and Password are required",
       };
     }
 
     // =========================
-    // FIND USER
+    // CHECK EXISTING USER
     // =========================
 
-    const user = await SignupModel.findOne({
+    const existingUser = await SignupModel.findOne({
       email: email.toLowerCase(),
     });
 
-    if (!user) {
+    if (existingUser) {
       return {
         success: false,
-        message: "User not found",
+        message: "User already exists",
       };
     }
 
     // =========================
-    // CHECK PASSWORD
+    // HASH PASSWORD
     // =========================
 
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
-
-    if (!isMatch) {
-      return {
-        success: false,
-        message: "Invalid password",
-      };
-    }
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // =========================
-    // CREATE JWT
+    // CREATE USER
     // =========================
 
-    const token = jwt.sign(
-      {
-        id: user._id,
-        email: user.email,
-      },
-      "XH1KSP_VDM",
-      {
-        expiresIn: "12h",
-      }
-    );
+    const newUser = await SignupModel.create({
+      name,
+      email: email.toLowerCase(),
+      password: hashedPassword,
+      phone: phone || "",
+    });
 
     // =========================
-    // LOGIN SUCCESS
+    // SUCCESS RESPONSE
     // =========================
 
     return {
       success: true,
-
-      message: "Login Successful",
-
-      token: token,
-
+      message: "Signup successful",
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role || "user",
-        phone: user.phone || "",
-        bio: user.bio || "",
-        profileImage: user.profileImage || "",
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        phone: newUser.phone,
       },
     };
+
   } catch (error) {
     return {
       success: false,
@@ -99,5 +78,5 @@ const loginUserdata = async (body) => {
 };
 
 module.exports = {
-  loginUserdata,
+  signupUserdata,
 };
