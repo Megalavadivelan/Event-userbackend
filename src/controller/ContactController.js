@@ -1,6 +1,6 @@
 const {
   sendContactMessageData,
-} = require("../service/ContactService");
+} = require("../service/ContactServices");
 
 const sendContactMessage = async (req, res) => {
   try {
