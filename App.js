@@ -11,6 +11,8 @@ const AdminRouter = require("./src/router/AdminRouter");
 const EventRouter = require("./src/router/EventRouter");
 const ProfileRouter = require("./src/router/ProfileRouter");
 const ContactRouter = require("./src/router/ContactRouter");
+const OrganizereqRouter = require("./src/router/OrganizereqRouter");
+
 
 const app = express();
 
@@ -46,6 +48,10 @@ app.use(
   express.static(path.join(__dirname, "uploads"))
 );
 
+app.use(
+  "/organizer-requests",
+  OrganizereqRouter
+);
 // ========================================
 // MONGODB CONNECTION FUNCTION
 // ========================================
