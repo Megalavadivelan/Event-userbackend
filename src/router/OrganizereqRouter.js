@@ -3,12 +3,14 @@ const express = require("express");
 const router = express.Router();
 
 const {
-createOrganizerRequest,
+  createOrganizerRequest,
 } = require("../controller/OrganizereqController");
 
+
 router.post(
-"/",
-createOrganizerRequest
+  "/",
+  createOrganizerRequest
 );
+
 
 module.exports = router;

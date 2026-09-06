@@ -1,65 +1,73 @@
 const OrganizerRequest = require(
-"../model/OrganizereqModel.js"
+  "../model/OrganizereqModel"
 );
+
 
 const createOrganizerRequest = async (req, res) => {
-try {
-const {
-organizerName,
-email,
-phone,
-eventName,
-description,
-eventDate,
-location,
-expectedParticipants,
-category,
-ticketFee,
-estimatedBudget,
-} = req.body;
+  try {
+
+    console.log(
+      "Organizer Request Body:",
+      req.body
+    );
+
+    const {
+      organizerName,
+      email,
+      phone,
+      eventName,
+      description,
+      eventDate,
+      location,
+      expectedParticipants,
+      category,
+      ticketFee,
+      estimatedBudget,
+    } = req.body;
 
 
-const newRequest = await OrganizerRequest.create({
-  organizerName,
-  email,
-  phone,
-  eventName,
-  description,
-  eventDate,
-  location,
-  expectedParticipants,
-  category,
-  ticketFee,
-  estimatedBudget:
-    estimatedBudget === ""
-      ? null
-      : estimatedBudget,
-});
-
-return res.status(201).json({
-  success: true,
-  message:
-    "Event organization request sent successfully!",
-  data: newRequest,
-});
+    const newRequest =
+      await OrganizerRequest.create({
+        organizerName,
+        email,
+        phone,
+        eventName,
+        description,
+        eventDate,
+        location,
+        expectedParticipants,
+        category,
+        ticketFee,
+        estimatedBudget:
+          estimatedBudget || null,
+      });
 
 
-} catch (error) {
-console.error(
-"ORGANIZER REQUEST ERROR:",
-error
-);
+    return res.status(201).json({
+      success: true,
+      message:
+        "Event request sent successfully",
+      data: newRequest,
+    });
 
+  } catch (error) {
 
-return res.status(500).json({
-  success: false,
-  message: error.message,
-});
+    console.error(
+      "ORGANIZER REQUEST ERROR:",
+      error
+    );
 
+    return res.status(500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to send organizer request",
+    });
 
-}
+  }
 };
 
+
 module.exports = {
-createOrganizerRequest,
+  createOrganizerRequest,
 };

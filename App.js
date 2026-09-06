@@ -48,10 +48,7 @@ app.use(
   express.static(path.join(__dirname, "uploads"))
 );
 
-app.use(
-  "/organizer-requests",
-  OrganizereqRouter
-);
+
 // ========================================
 // MONGODB CONNECTION FUNCTION
 // ========================================
@@ -117,7 +114,10 @@ app.use("/events", EventRouter);
 app.use("/profile", ProfileRouter);
 
 app.use("/contact", ContactRouter);
-
+app.use(
+  "/organizer-requests",
+  OrganizereqRouter
+);
 // ========================================
 // HOME ROUTE
 // ========================================
