@@ -1,23 +1,36 @@
+
 const SignupModel = require("../model/SignupModel");
+
 const bcrypt = require("bcryptjs");
+
 const jwt = require("jsonwebtoken");
+
+// =====================================================
+// POST LOGIN SERVICE
+// =====================================================
 
 const loginUserdata = async (body) => {
   try {
 
-    // Get name and password from frontend
-    const { email, password } = body;
+    const {
+      email,
+      password,
+    } = body;
 
     // Check fields
     if (!email || !password) {
       return {
         success: false,
-        message: "email and Password are required",
+        message:
+          "email and Password are required",
       };
     }
 
-    // Find user by name
-    const user = await SignupModel.findOne({ email: email });
+    // Find user by email
+    const user =
+      await SignupModel.findOne({
+        email: email,
+      });
 
     // User not found
     if (!user) {
@@ -27,11 +40,12 @@ const loginUserdata = async (body) => {
       };
     }
 
-    // Compare entered password with hashed password
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    // Compare password
+    const isMatch =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
     // Wrong password
     if (!isMatch) {
@@ -53,7 +67,6 @@ const loginUserdata = async (body) => {
       }
     );
 
-    // Login successful
     return {
       success: true,
       message: "Login Successful",
@@ -68,15 +81,39 @@ const loginUserdata = async (body) => {
     };
 
   } catch (error) {
-
     return {
       success: false,
       message: error.message,
     };
+  }
+};
 
+// =====================================================
+// GET ALL USERS SERVICE
+// =====================================================
+
+const getUsersData = async () => {
+  try {
+
+    const users =
+      await SignupModel.find({})
+        .select("-password");
+
+    return {
+      success: true,
+      message: "Users fetched successfully",
+      users: users,
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
   }
 };
 
 module.exports = {
   loginUserdata,
+  getUsersData,
 };
