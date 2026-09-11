@@ -1,14 +1,7 @@
 
 const SignupModel = require("../model/SignupModel");
-
 const bcrypt = require("bcryptjs");
-
 const jwt = require("jsonwebtoken");
-
-// =====================================================
-// POST LOGIN SERVICE
-// =====================================================
-
 const loginUserdata = async (body) => {
   try {
 
@@ -26,13 +19,11 @@ const loginUserdata = async (body) => {
       };
     }
 
-    // Find user by email
     const user =
       await SignupModel.findOne({
         email: email,
       });
 
-    // User not found
     if (!user) {
       return {
         success: false,
@@ -40,14 +31,12 @@ const loginUserdata = async (body) => {
       };
     }
 
-    // Compare password
     const isMatch =
       await bcrypt.compare(
         password,
         user.password
       );
 
-    // Wrong password
     if (!isMatch) {
       return {
         success: false,
@@ -55,7 +44,6 @@ const loginUserdata = async (body) => {
       };
     }
 
-    // Create JWT token
     const token = jwt.sign(
       {
         id: user._id,
@@ -87,11 +75,6 @@ const loginUserdata = async (body) => {
     };
   }
 };
-
-// =====================================================
-// GET ALL USERS SERVICE
-// =====================================================
-
 const getUsersData = async () => {
   try {
 
@@ -113,7 +96,35 @@ const getUsersData = async () => {
   }
 };
 
+const getIndividualUserData = async (id) => {
+  try {
+    const user = await SignupModel
+      .findById(id)
+      .select("-password");
+
+    if (!user) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
+
+    return {
+      success: true,
+      message: "User details fetched successfully",
+      user: user,
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
 module.exports = {
   loginUserdata,
   getUsersData,
+  getIndividualUserData,
 };
