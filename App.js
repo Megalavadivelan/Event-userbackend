@@ -2,7 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
+
 require("dotenv").config();
+
+// =====================================================
+// ROUTERS
+// =====================================================
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
@@ -19,30 +24,43 @@ const app = express();
 // =====================================================
 
 const allowedOrigins = [
+  "https://event-user-one.vercel.app",
+  "https://eventuser-two.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://eventuser-two.vercel.app",
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin
-      // (Thunder Client, Postman, server-to-server, etc.)
+      // Allow Thunder Client, Postman and server-to-server requests
       if (!origin) {
         return callback(null, true);
       }
 
+      // Allow registered frontend origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
+
+      console.log("CORS blocked origin:", origin);
 
       return callback(
         new Error("Not allowed by CORS")
       );
     },
+
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "OPTIONS",
+    ],
+
     allowedHeaders: [
       "Content-Type",
       "Authorization",
@@ -68,7 +86,9 @@ app.use(
 
 app.use(
   "/uploads",
-  express.static(path.join(__dirname, "uploads"))
+  express.static(
+    path.join(__dirname, "uploads")
+  )
 );
 
 // =====================================================
@@ -85,14 +105,18 @@ const connectDB = async () => {
     const MONGO_URI = process.env.MONGO_URI;
 
     if (!MONGO_URI) {
-      throw new Error("MONGO_URI is not defined");
+      throw new Error(
+        "MONGO_URI is not defined"
+      );
     }
 
     await mongoose.connect(MONGO_URI, {
       serverSelectionTimeoutMS: 10000,
     });
 
-    console.log("MongoDB connected successfully");
+    console.log(
+      "MongoDB connected successfully"
+    );
   } catch (error) {
     console.error(
       "MongoDB connection error:",
@@ -112,6 +136,11 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (error) {
+    console.error(
+      "Database middleware error:",
+      error.message
+    );
+
     return res.status(500).json({
       success: false,
       message: "Database connection failed",
@@ -123,17 +152,35 @@ app.use(async (req, res, next) => {
 // ROUTES
 // =====================================================
 
-app.use("/signup", SignupRouter);
+app.use(
+  "/signup",
+  SignupRouter
+);
 
-app.use("/login", LoginRouter);
+app.use(
+  "/login",
+  LoginRouter
+);
 
-app.use("/admin", AdminRouter);
+app.use(
+  "/admin",
+  AdminRouter
+);
 
-app.use("/events", EventRouter);
+app.use(
+  "/events",
+  EventRouter
+);
 
-app.use("/profile", ProfileRouter);
+app.use(
+  "/profile",
+  ProfileRouter
+);
 
-app.use("/contact", ContactRouter);
+app.use(
+  "/contact",
+  ContactRouter
+);
 
 app.use(
   "/organizer-requests",
@@ -147,7 +194,8 @@ app.use(
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: "Event Management Backend is running",
+    message:
+      "Event Management Backend is running",
   });
 });
 
@@ -167,10 +215,13 @@ app.use((req, res) => {
 // =====================================================
 
 if (require.main === module) {
-  const PORT = process.env.PORT || 2005;
+  const PORT =
+    process.env.PORT || 2005;
 
   app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(
+      `Server running on port ${PORT}`
+    );
   });
 }
 
