@@ -1,65 +1,284 @@
-const Event = require("../model/EventModel");
+const eventModel = require("../Model/EventModel");
 
-// GET ALL EVENTS
-const getAllEvents = async (req, res) => {
+// =====================================================
+// CREATE EVENT
+// =====================================================
+
+const createEvent = async (req, res) => {
   try {
-    const events = await Event.find().sort({ date: 1 });
+    console.log("=================================");
+    console.log("CREATE EVENT");
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("=================================");
 
-    res.status(200).json({
-      success: true,
-      count: events.length,
-      events: events
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch events",
-      error: error.message
-    });
-  }
-};
-
-
-// GET SINGLE EVENT
-const getEventById = async (req, res) => {
-
-  try {
-
-    const event = await Event.findById(req.params.id);
-
-    if (!event) {
-
-      return res.status(404).json({
+    // Check image
+    if (!req.file) {
+      return res.status(400).json({
         success: false,
-        message: "Event not found"
+        message: "Event image is required",
       });
-
     }
 
-    res.status(200).json({
+    // Check required fields
+    const {
+      name,
+      organizer,
+      date,
+      time,
+      location,
+      description,
+      tickets,
+      status,
+    } = req.body;
+
+    if (
+      !name ||
+      !organizer ||
+      !date ||
+      !time ||
+      !location ||
+      !description ||
+      tickets === undefined ||
+      !status
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "All event fields are required",
+      });
+    }
+
+    // Convert image to Base64
+    const imageData = `data:${req.file.mimetype};base64,${req.file.buffer.toString(
+      "base64"
+    )}`;
+
+    // Create event
+    const newEvent = new eventModel({
+      name: name,
+      organizer: organizer,
+      date: date,
+      time: time,
+      location: location,
+      description: description,
+      tickets: Number(tickets),
+      status: status,
+
+      // Save image directly inside MongoDB
+      image: imageData,
+    });
+
+    // Save to MongoDB
+    const savedEvent = await newEvent.save();
+
+    console.log("EVENT SAVED:", savedEvent);
+
+    return res.status(201).json({
       success: true,
-      event: event
+      message: "Event created successfully",
+      data: savedEvent,
     });
-
   } catch (error) {
+    console.error("CREATE EVENT ERROR:", error);
 
-    console.error(error);
-
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: "Failed to fetch event",
-      error: error.message
+      message: "Failed to create event",
+      error: error.message,
     });
-
   }
 };
 
+// =====================================================
+// GET ALL EVENTS
+// =====================================================
+
+const getEvents = async (req, res) => {
+  try {
+    const events = await eventModel
+      .find()
+      .sort({
+        createdAt: -1,
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Events fetched successfully",
+      data: events,
+    });
+  } catch (error) {
+    console.error("GET EVENTS ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get events",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// GET SINGLE EVENT
+// =====================================================
+
+const getSingleEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const event = await eventModel.findById(id);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Event fetched successfully",
+      data: event,
+    });
+  } catch (error) {
+    console.error("GET SINGLE EVENT ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to get event",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// UPDATE EVENT
+// =====================================================
+
+const updateEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log("=================================");
+    console.log("UPDATE EVENT");
+    console.log("ID:", id);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("=================================");
+
+    const existingEvent = await eventModel.findById(id);
+
+    if (!existingEvent) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    // Update text fields
+    if (req.body.name !== undefined) {
+      existingEvent.name = req.body.name;
+    }
+
+    if (req.body.organizer !== undefined) {
+      existingEvent.organizer = req.body.organizer;
+    }
+
+    if (req.body.date !== undefined) {
+      existingEvent.date = req.body.date;
+    }
+
+    if (req.body.time !== undefined) {
+      existingEvent.time = req.body.time;
+    }
+
+    if (req.body.location !== undefined) {
+      existingEvent.location = req.body.location;
+    }
+
+    if (req.body.description !== undefined) {
+      existingEvent.description = req.body.description;
+    }
+
+    if (req.body.tickets !== undefined) {
+      existingEvent.tickets = Number(req.body.tickets);
+    }
+
+    if (req.body.status !== undefined) {
+      existingEvent.status = req.body.status;
+    }
+
+    // Update image only when a new image is uploaded
+    if (req.file) {
+      const imageData = `data:${
+        req.file.mimetype
+      };base64,${req.file.buffer.toString("base64")}`;
+
+      existingEvent.image = imageData;
+    }
+
+    // Save updated event
+    const updatedEvent = await existingEvent.save();
+
+    console.log("UPDATED EVENT:", updatedEvent);
+
+    return res.status(200).json({
+      success: true,
+      message: "Event updated successfully",
+      data: updatedEvent,
+    });
+  } catch (error) {
+    console.error("UPDATE EVENT ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update event",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// DELETE EVENT
+// =====================================================
+
+const deleteEvent = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deletedEvent =
+      await eventModel.findByIdAndDelete(id);
+
+    if (!deletedEvent) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Event deleted successfully",
+      data: deletedEvent,
+    });
+  } catch (error) {
+    console.error("DELETE EVENT ERROR:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete event",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// EXPORT
+// =====================================================
 
 module.exports = {
-  getAllEvents,
-  getEventById
+  createEvent,
+  getEvents,
+  getSingleEvent,
+  updateEvent,
+  deleteEvent,
 };
