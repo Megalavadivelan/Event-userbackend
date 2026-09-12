@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const mongoose = require("mongoose");
-
 require("dotenv").config();
 
 // =====================================================
@@ -11,13 +10,12 @@ require("dotenv").config();
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
-const LoginHistoryRouter = require("./router/LoginHistoryRouter");
 const AdminRouter = require("./src/router/AdminRouter");
 const EventRouter = require("./src/router/EventRouter");
 const ProfileRouter = require("./src/router/ProfileRouter");
 const ContactRouter = require("./src/router/ContactRouter");
 const OrganizereqRouter = require("./src/router/OrganizereqRouter");
-const BookingRouter = require("./src/router/BookingsRouter")
+const BookingRouter = require("./src/router/BookingsRouter");
 
 const app = express();
 
@@ -40,16 +38,13 @@ app.use(
         return callback(null, true);
       }
 
-      // Allow registered frontend origins
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
       console.log("CORS blocked origin:", origin);
 
-      return callback(
-        new Error("Not allowed by CORS")
-      );
+      return callback(new Error("Not allowed by CORS"));
     },
 
     credentials: true,
@@ -88,9 +83,7 @@ app.use(
 
 app.use(
   "/uploads",
-  express.static(
-    path.join(__dirname, "uploads")
-  )
+  express.static(path.join(__dirname, "uploads"))
 );
 
 // =====================================================
@@ -107,18 +100,14 @@ const connectDB = async () => {
     const MONGO_URI = process.env.MONGO_URI;
 
     if (!MONGO_URI) {
-      throw new Error(
-        "MONGO_URI is not defined"
-      );
+      throw new Error("MONGO_URI is not defined");
     }
 
     await mongoose.connect(MONGO_URI, {
       serverSelectionTimeoutMS: 10000,
     });
 
-    console.log(
-      "MongoDB connected successfully"
-    );
+    console.log("MongoDB connected successfully");
   } catch (error) {
     console.error(
       "MongoDB connection error:",
@@ -154,42 +143,24 @@ app.use(async (req, res, next) => {
 // ROUTES
 // =====================================================
 
-app.use(
-  "/signup",
-  SignupRouter
-);
+app.use("/signup", SignupRouter);
 
-app.use(
-  "/login",
-  LoginRouter
-);
+app.use("/login", LoginRouter);
 
-app.use("/loginhistory", LoginHistoryRouter);
-app.use(
-  "/admin",
-  AdminRouter
-);
+app.use("/admin", AdminRouter);
 
-app.use(
-  "/events",
-  EventRouter
-);
+app.use("/events", EventRouter);
 
-app.use(
-  "/profile",
-  ProfileRouter
-);
+app.use("/profile", ProfileRouter);
 
-app.use(
-  "/contact",
-  ContactRouter
-);
+app.use("/contact", ContactRouter);
 
 app.use(
   "/organizer-requests",
   OrganizereqRouter
 );
-app.use("/booking",BookingRouter)
+
+app.use("/booking", BookingRouter);
 
 // =====================================================
 // HOME ROUTE
@@ -198,8 +169,7 @@ app.use("/booking",BookingRouter)
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message:
-      "Event Management Backend is running",
+    message: "Event Management Backend is running",
   });
 });
 
@@ -219,8 +189,7 @@ app.use((req, res) => {
 // =====================================================
 
 if (require.main === module) {
-  const PORT =
-    process.env.PORT || 2005;
+  const PORT = process.env.PORT || 2005;
 
   app.listen(PORT, () => {
     console.log(
