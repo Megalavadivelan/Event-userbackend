@@ -1,7 +1,7 @@
 const SignupModel = require("../model/SignupModel");
+const LoginHistoryModel = require("../model/LoginHistoryModel");
 
 const bcrypt = require("bcryptjs");
-
 const jwt = require("jsonwebtoken");
 
 const loginUserdata = async (body) => {
@@ -11,7 +11,7 @@ const loginUserdata = async (body) => {
       password,
     } = body;
 
-    // *Check fields*
+    // Check fields
     if (!email || !password) {
       return {
         success: false,
@@ -53,6 +53,21 @@ const loginUserdata = async (body) => {
       }
     );
 
+    // =====================================================
+    // SAVE LOGIN HISTORY AFTER SUCCESSFUL LOGIN
+    // =====================================================
+
+    await LoginHistoryModel.create({
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      loginTime: new Date(),
+      logoutTime: null,
+      status: "Active",
+    });
+
+    // =====================================================
+
     return {
       success: true,
       message: "Login Successful",
@@ -63,6 +78,7 @@ const loginUserdata = async (body) => {
         email: user.email,
       },
     };
+
   } catch (error) {
     return {
       success: false,
@@ -71,16 +87,23 @@ const loginUserdata = async (body) => {
   }
 };
 
+
+// =====================================================
+// GET ALL USERS
+// =====================================================
+
 const getUsersData = async () => {
   try {
     const users = await SignupModel.find({})
-      .select("-password");
+      .select("-password")
+      .lean();
 
     return {
       success: true,
       message: "Users fetched successfully",
       users: users,
     };
+
   } catch (error) {
     return {
       success: false,
@@ -89,11 +112,17 @@ const getUsersData = async () => {
   }
 };
 
+
+// =====================================================
+// GET INDIVIDUAL USER
+// =====================================================
+
 const getIndividualUserData = async (id) => {
   try {
     const user = await SignupModel
       .findById(id)
-      .select("-password");
+      .select("-password")
+      .lean();
 
     if (!user) {
       return {
@@ -107,6 +136,7 @@ const getIndividualUserData = async (id) => {
       message: "User details fetched successfully",
       user: user,
     };
+
   } catch (error) {
     return {
       success: false,
@@ -114,6 +144,7 @@ const getIndividualUserData = async (id) => {
     };
   }
 };
+
 
 module.exports = {
   loginUserdata,
