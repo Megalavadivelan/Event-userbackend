@@ -1,6 +1,6 @@
 const SignupModel = require("../model/SignupModel");
 
-const LoginHistoryModel = require("../model/LoginHistoryModel");
+// const LoginHistoryModel = require("../model/LoginHistoryModel");
 
 const bcrypt = require("bcryptjs");
 
@@ -57,12 +57,12 @@ const loginUserdata = async (body) => {
     // SAVE LOGIN HISTORY
     // ==================================
 
-    await LoginHistoryModel.create({
-      userId: user._id,
-      email: user.email,
-      loginTime: new Date(),
-      status: "Active",
-    });
+    // await LoginHistoryModel.create({
+    //   userId: user._id,
+    //   email: user.email,
+    //   loginTime: new Date(),
+    //   status: "Active",
+    // });
 
 
     // Create JWT token
