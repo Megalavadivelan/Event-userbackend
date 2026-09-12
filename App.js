@@ -16,6 +16,7 @@ const EventRouter = require("./src/router/EventRouter");
 const ProfileRouter = require("./src/router/ProfileRouter");
 const ContactRouter = require("./src/router/ContactRouter");
 const OrganizereqRouter = require("./src/router/OrganizereqRouter");
+const BookingRouter = require("./src/router/BookingsRouter")
 
 const app = express();
 
@@ -186,6 +187,7 @@ app.use(
   "/organizer-requests",
   OrganizereqRouter
 );
+app.use("/booking",BookingRouter)
 
 // =====================================================
 // HOME ROUTE
