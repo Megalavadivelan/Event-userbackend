@@ -11,6 +11,7 @@ require("dotenv").config();
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
+const LoginHistoryRouter = require("./router/LoginHistoryRouter");
 const AdminRouter = require("./src/router/AdminRouter");
 const EventRouter = require("./src/router/EventRouter");
 const ProfileRouter = require("./src/router/ProfileRouter");
@@ -163,6 +164,7 @@ app.use(
   LoginRouter
 );
 
+app.use("/loginhistory", LoginHistoryRouter);
 app.use(
   "/admin",
   AdminRouter

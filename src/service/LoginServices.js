@@ -1,10 +1,18 @@
-
 const SignupModel = require("../model/SignupModel");
+
+const LoginHistoryModel = require("../model/LoginHistoryModel");
+
 const bcrypt = require("bcryptjs");
+
 const jwt = require("jsonwebtoken");
+
+
+// ===============================
+// LOGIN USER
+// ===============================
+
 const loginUserdata = async (body) => {
   try {
-
     const {
       email,
       password,
@@ -14,15 +22,14 @@ const loginUserdata = async (body) => {
     if (!email || !password) {
       return {
         success: false,
-        message:
-          "email and Password are required",
+        message: "email and Password are required",
       };
     }
 
-    const user =
-      await SignupModel.findOne({
-        email: email,
-      });
+    // Find user
+    const user = await SignupModel.findOne({
+      email: email,
+    });
 
     if (!user) {
       return {
@@ -31,11 +38,11 @@ const loginUserdata = async (body) => {
       };
     }
 
-    const isMatch =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
+    // Compare password
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isMatch) {
       return {
@@ -44,6 +51,21 @@ const loginUserdata = async (body) => {
       };
     }
 
+
+    // ==================================
+    // LOGIN SUCCESSFUL
+    // SAVE LOGIN HISTORY
+    // ==================================
+
+    await LoginHistoryModel.create({
+      userId: user._id,
+      email: user.email,
+      loginTime: new Date(),
+      status: "Active",
+    });
+
+
+    // Create JWT token
     const token = jwt.sign(
       {
         id: user._id,
@@ -55,6 +77,8 @@ const loginUserdata = async (body) => {
       }
     );
 
+
+    // Return login response
     return {
       success: true,
       message: "Login Successful",
@@ -75,12 +99,18 @@ const loginUserdata = async (body) => {
     };
   }
 };
+
+
+
+// ===============================
+// GET ALL USERS
+// ===============================
+
 const getUsersData = async () => {
   try {
 
-    const users =
-      await SignupModel.find({})
-        .select("-password");
+    const users = await SignupModel.find({})
+      .select("-password");
 
     return {
       success: true,
@@ -89,15 +119,24 @@ const getUsersData = async () => {
     };
 
   } catch (error) {
+
     return {
       success: false,
       message: error.message,
     };
+
   }
 };
 
+
+
+// ===============================
+// GET INDIVIDUAL USER
+// ===============================
+
 const getIndividualUserData = async (id) => {
   try {
+
     const user = await SignupModel
       .findById(id)
       .select("-password");
@@ -116,15 +155,24 @@ const getIndividualUserData = async (id) => {
     };
 
   } catch (error) {
+
     return {
       success: false,
       message: error.message,
     };
+
   }
 };
+
+
+
+// ===============================
+// EXPORT
+// ===============================
 
 module.exports = {
   loginUserdata,
   getUsersData,
   getIndividualUserData,
 };
+
