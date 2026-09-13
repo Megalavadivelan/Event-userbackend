@@ -17,6 +17,7 @@ const ProfileRouter = require("./src/router/ProfileRouter");
 const ContactRouter = require("./src/router/ContactRouter");
 const OrganizereqRouter = require("./src/router/OrganizereqRouter");
 const BookingRouter = require("./src/router/BookingsRouter");
+const BookTicketRouter = require("./src/router/BookTicketRouter")
 
 const app = express();
 
@@ -164,6 +165,11 @@ app.use(
 );
 
 app.use("/booking", BookingRouter);
+
+app.use(
+  "/bookticket",
+  BookTicketRouter
+);
 
 // =====================================================
 // HOME ROUTE
