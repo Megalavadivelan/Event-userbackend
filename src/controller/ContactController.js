@@ -52,6 +52,31 @@ const getContacts = async (req, res) => {
   }
 };
 
+const getIndividualContact = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result =
+      await ContactService.getIndividualContactData(id);
+
+    if (result.success) {
+      return res.status(200).json(result);
+    }
+
+    return res.status(404).json(result);
+
+  } catch (error) {
+    console.error(
+      "GET INDIVIDUAL CONTACT CONTROLLER ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // =====================================================
 // EXPORT
@@ -60,4 +85,5 @@ const getContacts = async (req, res) => {
 module.exports = {
   sendContactMessage,
   getContacts,
+  getIndividualContact,
 };

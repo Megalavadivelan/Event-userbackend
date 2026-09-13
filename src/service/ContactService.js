@@ -74,6 +74,37 @@ const getContactsData = async () => {
   }
 };
 
+const getIndividualContactData = async (id) => {
+  try {
+    const contact = await ContactModel
+      .findById(id)
+      .lean();
+
+    if (!contact) {
+      return {
+        success: false,
+        message: "Contact not found",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Contact details fetched successfully",
+      contact: contact,
+    };
+
+  } catch (error) {
+    console.error(
+      "GET INDIVIDUAL CONTACT ERROR:",
+      error
+    );
+
+    return {
+      success: false,
+      message: error.message,
+    };
+  }
+};
 
 // =====================================================
 // EXPORT
@@ -82,4 +113,5 @@ const getContactsData = async () => {
 module.exports = {
   sendContactMessageData,
   getContactsData,
+  getIndividualContactData,
 };

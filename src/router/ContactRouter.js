@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  sendContactMessage,getContacts,
+  sendContactMessage,getContacts,getIndividualContact,
 } = require("../controller/ContactController");
 
 router.post(
@@ -12,5 +12,10 @@ router.post(
 );
 
 router.get("/getcontacts", getContacts);
+
+router.get(
+  "/getcontact/:id",
+  getIndividualContact
+);
 
 module.exports = router;
