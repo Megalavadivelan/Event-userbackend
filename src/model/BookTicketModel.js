@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 
+// =====================================================
+// ATTENDEE SCHEMA
+// =====================================================
+
 const AttendeeSchema = new mongoose.Schema(
   {
     name: {
@@ -26,11 +30,15 @@ const AttendeeSchema = new mongoose.Schema(
   }
 );
 
+// =====================================================
+// BOOKING SCHEMA
+// =====================================================
+
 const BookTicketSchema = new mongoose.Schema(
   {
-    // =========================================
+    // =================================================
     // USER DETAILS
-    // =========================================
+    // =================================================
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -51,9 +59,9 @@ const BookTicketSchema = new mongoose.Schema(
       lowercase: true,
     },
 
-    // =========================================
+    // =================================================
     // EVENT DETAILS
-    // =========================================
+    // =================================================
 
     eventId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -71,13 +79,32 @@ const BookTicketSchema = new mongoose.Schema(
       required: false,
     },
 
-    // =========================================
+    eventTime: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    eventLocation: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    eventCategory: {
+      type: String,
+      default: "Event",
+      trim: true,
+    },
+
+    // =================================================
     // TICKET DETAILS
-    // =========================================
+    // =================================================
 
     ticketPrice: {
       type: Number,
       default: 0,
+      min: 0,
     },
 
     numberOfTickets: {
@@ -87,9 +114,9 @@ const BookTicketSchema = new mongoose.Schema(
       max: 4,
     },
 
-    // =========================================
-    // ATTENDEE DETAILS
-    // =========================================
+    // =================================================
+    // ATTENDEES
+    // =================================================
 
     attendees: {
       type: [AttendeeSchema],
@@ -101,38 +128,38 @@ const BookTicketSchema = new mongoose.Schema(
             Array.isArray(value) &&
             value.length >= 1 &&
             value.length <= 4 &&
-            value.length ===
-              Number(this.numberOfTickets)
+            value.length === Number(this.numberOfTickets)
           );
         },
 
         message:
-          "Attendee count must match number of tickets and cannot exceed 4",
+          "Attendee count must match number of tickets.",
       },
     },
 
-    // =========================================
-    // PAYMENT / TOTAL
-    // =========================================
+    // =================================================
+    // TOTAL
+    // =================================================
 
     totalAmount: {
       type: Number,
       required: true,
       default: 0,
+      min: 0,
     },
 
-    // =========================================
+    // =================================================
     // BOOKING DATE
-    // =========================================
+    // =================================================
 
     bookingDate: {
       type: Date,
       default: Date.now,
     },
 
-    // =========================================
+    // =================================================
     // STATUS
-    // =========================================
+    // =================================================
 
     status: {
       type: String,

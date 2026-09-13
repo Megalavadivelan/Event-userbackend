@@ -1,4 +1,8 @@
-const BookTicketModel = require("../model/BookTicketModel");
+const mongoose = require("mongoose");
+
+const BookTicketModel = require(
+  "../model/BookTicketModel"
+);
 
 // =====================================================
 // CREATE BOOKING
@@ -14,6 +18,9 @@ const createBookingData = async (body) => {
       eventId,
       eventName,
       eventDate,
+      eventTime,
+      eventLocation,
+      eventCategory,
 
       ticketPrice,
       numberOfTickets,
@@ -36,17 +43,37 @@ const createBookingData = async (body) => {
     ) {
       return {
         success: false,
-        message:
-          "Required booking details are missing",
+        message: "Required booking details are missing.",
       };
     }
 
     // =================================================
-    // TICKET COUNT VALIDATION
+    // VALIDATE USER ID
     // =================================================
 
-    const ticketCount =
-      Number(numberOfTickets);
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return {
+        success: false,
+        message: "Invalid user ID.",
+      };
+    }
+
+    // =================================================
+    // VALIDATE EVENT ID
+    // =================================================
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return {
+        success: false,
+        message: "Invalid event ID.",
+      };
+    }
+
+    // =================================================
+    // TICKET COUNT
+    // =================================================
+
+    const ticketCount = Number(numberOfTickets);
 
     if (
       !Number.isInteger(ticketCount) ||
@@ -55,13 +82,12 @@ const createBookingData = async (body) => {
     ) {
       return {
         success: false,
-        message:
-          "You can book maximum 4 tickets",
+        message: "You can book maximum 4 tickets.",
       };
     }
 
     // =================================================
-    // ATTENDEE VALIDATION
+    // ATTENDEE ARRAY
     // =================================================
 
     if (
@@ -71,16 +97,19 @@ const createBookingData = async (body) => {
       return {
         success: false,
         message:
-          "Attendee details must match the number of tickets",
+          "Attendee details must match the number of tickets.",
       };
     }
 
     // =================================================
-    // EACH ATTENDEE VALIDATION
+    // VALIDATE EACH ATTENDEE
     // =================================================
 
-    for (const attendee of attendees) {
+    for (let i = 0; i < attendees.length; i++) {
+      const attendee = attendees[i];
+
       if (
+        !attendee ||
         !attendee.name ||
         !attendee.email ||
         !attendee.phone
@@ -88,7 +117,32 @@ const createBookingData = async (body) => {
         return {
           success: false,
           message:
-            "Name, email and phone are required for every attendee",
+            `Name, email and phone are required for attendee ${
+              i + 1
+            }.`,
+        };
+      }
+
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(attendee.email)) {
+        return {
+          success: false,
+          message:
+            `Invalid email for attendee ${i + 1}.`,
+        };
+      }
+
+      const phonePattern = /^[6-9]\d{9}$/;
+
+      if (!phonePattern.test(attendee.phone)) {
+        return {
+          success: false,
+          message:
+            `Invalid phone number for attendee ${
+              i + 1
+            }.`,
         };
       }
     }
@@ -97,8 +151,18 @@ const createBookingData = async (body) => {
     // PRICE
     // =================================================
 
-    const price =
-      Number(ticketPrice) || 0;
+    const price = Number(ticketPrice) || 0;
+
+    if (price < 0) {
+      return {
+        success: false,
+        message: "Invalid ticket price.",
+      };
+    }
+
+    // =================================================
+    // TOTAL AMOUNT
+    // =================================================
 
     const totalAmount =
       price * ticketCount;
@@ -110,18 +174,24 @@ const createBookingData = async (body) => {
     const booking =
       await BookTicketModel.create({
         userId,
-
         userName,
-
         userEmail,
 
         eventId,
-
         eventName,
 
         eventDate: eventDate
           ? new Date(eventDate)
           : undefined,
+
+        eventTime:
+          eventTime || "",
+
+        eventLocation:
+          eventLocation || "",
+
+        eventCategory:
+          eventCategory || "Event",
 
         ticketPrice: price,
 
@@ -131,23 +201,22 @@ const createBookingData = async (body) => {
         attendees,
 
         totalAmount,
+
+        status: "Confirmed",
       });
 
     // =================================================
-    // SUCCESS RESPONSE
+    // SUCCESS
     // =================================================
 
     return {
       success: true,
-
-      message:
-        "Ticket booked successfully",
-
+      message: "Ticket booked successfully.",
       booking,
     };
   } catch (error) {
     console.error(
-      "BOOKING SERVICE ERROR:",
+      "CREATE BOOKING ERROR:",
       error
     );
 
@@ -166,20 +235,20 @@ const getBookingsData = async () => {
   try {
     const bookings =
       await BookTicketModel.find({})
-        .sort({ createdAt: -1 })
+        .sort({
+          createdAt: -1,
+        })
         .lean();
 
     return {
       success: true,
-
       message:
-        "Bookings fetched successfully",
-
+        "All bookings fetched successfully.",
       bookings,
     };
   } catch (error) {
     console.error(
-      "GET BOOKINGS ERROR:",
+      "GET ALL BOOKINGS ERROR:",
       error
     );
 
@@ -191,30 +260,37 @@ const getBookingsData = async () => {
 };
 
 // =====================================================
-// GET INDIVIDUAL BOOKING
+// GET ONE BOOKING
 // =====================================================
 
 const getIndividualBookingData =
   async (id) => {
     try {
+      if (
+        !mongoose.Types.ObjectId.isValid(id)
+      ) {
+        return {
+          success: false,
+          message: "Invalid booking ID.",
+        };
+      }
+
       const booking =
-        await BookTicketModel.findById(id)
+        await BookTicketModel
+          .findById(id)
           .lean();
 
       if (!booking) {
         return {
           success: false,
-          message:
-            "Booking not found",
+          message: "Booking not found.",
         };
       }
 
       return {
         success: true,
-
         message:
-          "Booking fetched successfully",
-
+          "Booking fetched successfully.",
         booking,
       };
     } catch (error) {
@@ -237,19 +313,36 @@ const getIndividualBookingData =
 const getUserBookingsData =
   async (userId) => {
     try {
+      // =================================================
+      // VALIDATE USER ID
+      // =================================================
+
+      if (
+        !mongoose.Types.ObjectId.isValid(userId)
+      ) {
+        return {
+          success: false,
+          message: "Invalid user ID.",
+        };
+      }
+
+      // =================================================
+      // FIND BOOKINGS
+      // =================================================
+
       const bookings =
         await BookTicketModel.find({
           userId,
         })
-          .sort({ createdAt: -1 })
+          .sort({
+            createdAt: -1,
+          })
           .lean();
 
       return {
         success: true,
-
         message:
-          "User bookings fetched successfully",
-
+          "User bookings fetched successfully.",
         bookings,
       };
     } catch (error) {
@@ -271,10 +364,7 @@ const getUserBookingsData =
 
 module.exports = {
   createBookingData,
-
   getBookingsData,
-
   getIndividualBookingData,
-
   getUserBookingsData,
 };

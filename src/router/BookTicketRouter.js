@@ -7,10 +7,13 @@ const {
   getBookings,
   getIndividualBooking,
   getUserBookings,
-} = require("../controller/BookTicketController");
+} = require(
+  "../controller/BookTicketController"
+);
 
 // =====================================================
 // CREATE BOOKING
+// POST /booking/create
 // =====================================================
 
 router.post(
@@ -20,6 +23,7 @@ router.post(
 
 // =====================================================
 // GET ALL BOOKINGS
+// GET /booking/getbookings
 // =====================================================
 
 router.get(
@@ -28,7 +32,8 @@ router.get(
 );
 
 // =====================================================
-// GET INDIVIDUAL BOOKING
+// GET ONE BOOKING
+// GET /booking/getbooking/:id
 // =====================================================
 
 router.get(
@@ -37,7 +42,8 @@ router.get(
 );
 
 // =====================================================
-// GET BOOKINGS OF ONE USER
+// GET USER BOOKINGS
+// GET /booking/user/:userId
 // =====================================================
 
 router.get(
