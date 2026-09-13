@@ -1,19 +1,33 @@
 const BookTicketModel = require("../model/BookTicketModel");
 
+// =====================================================
+// CREATE BOOKING
+// =====================================================
+
 const createBookingData = async (body) => {
   try {
     const {
       userId,
+      userName,
       userEmail,
+
       eventId,
       eventName,
+      eventDate,
+
       ticketPrice,
       numberOfTickets,
+
       attendees,
     } = body;
 
+    // =================================================
+    // REQUIRED FIELDS
+    // =================================================
+
     if (
       !userId ||
+      !userName ||
       !userEmail ||
       !eventId ||
       !eventName ||
@@ -22,23 +36,37 @@ const createBookingData = async (body) => {
     ) {
       return {
         success: false,
-        message: "Required booking details are missing",
+        message:
+          "Required booking details are missing",
       };
     }
 
+    // =================================================
+    // TICKET COUNT VALIDATION
+    // =================================================
+
+    const ticketCount =
+      Number(numberOfTickets);
+
     if (
-      numberOfTickets < 1 ||
-      numberOfTickets > 4
+      !Number.isInteger(ticketCount) ||
+      ticketCount < 1 ||
+      ticketCount > 4
     ) {
       return {
         success: false,
-        message: "You can book maximum 4 tickets",
+        message:
+          "You can book maximum 4 tickets",
       };
     }
 
+    // =================================================
+    // ATTENDEE VALIDATION
+    // =================================================
+
     if (
       !Array.isArray(attendees) ||
-      attendees.length !== Number(numberOfTickets)
+      attendees.length !== ticketCount
     ) {
       return {
         success: false,
@@ -46,6 +74,10 @@ const createBookingData = async (body) => {
           "Attendee details must match the number of tickets",
       };
     }
+
+    // =================================================
+    // EACH ATTENDEE VALIDATION
+    // =================================================
 
     for (const attendee of attendees) {
       if (
@@ -61,26 +93,56 @@ const createBookingData = async (body) => {
       }
     }
 
-    const price = Number(ticketPrice) || 0;
+    // =================================================
+    // PRICE
+    // =================================================
+
+    const price =
+      Number(ticketPrice) || 0;
 
     const totalAmount =
-      price * Number(numberOfTickets);
+      price * ticketCount;
+
+    // =================================================
+    // CREATE BOOKING
+    // =================================================
 
     const booking =
       await BookTicketModel.create({
         userId,
+
+        userName,
+
         userEmail,
+
         eventId,
+
         eventName,
+
+        eventDate: eventDate
+          ? new Date(eventDate)
+          : undefined,
+
         ticketPrice: price,
-        numberOfTickets,
+
+        numberOfTickets:
+          ticketCount,
+
         attendees,
+
         totalAmount,
       });
 
+    // =================================================
+    // SUCCESS RESPONSE
+    // =================================================
+
     return {
       success: true,
-      message: "Ticket booked successfully",
+
+      message:
+        "Ticket booked successfully",
+
       booking,
     };
   } catch (error) {
@@ -96,8 +158,9 @@ const createBookingData = async (body) => {
   }
 };
 
-
+// =====================================================
 // GET ALL BOOKINGS
+// =====================================================
 
 const getBookingsData = async () => {
   try {
@@ -108,10 +171,18 @@ const getBookingsData = async () => {
 
     return {
       success: true,
-      message: "Bookings fetched successfully",
+
+      message:
+        "Bookings fetched successfully",
+
       bookings,
     };
   } catch (error) {
+    console.error(
+      "GET BOOKINGS ERROR:",
+      error
+    );
+
     return {
       success: false,
       message: error.message,
@@ -119,64 +190,91 @@ const getBookingsData = async () => {
   }
 };
 
-
+// =====================================================
 // GET INDIVIDUAL BOOKING
+// =====================================================
 
-const getIndividualBookingData = async (id) => {
-  try {
-    const booking =
-      await BookTicketModel.findById(id)
-        .lean();
+const getIndividualBookingData =
+  async (id) => {
+    try {
+      const booking =
+        await BookTicketModel.findById(id)
+          .lean();
 
-    if (!booking) {
+      if (!booking) {
+        return {
+          success: false,
+          message:
+            "Booking not found",
+        };
+      }
+
+      return {
+        success: true,
+
+        message:
+          "Booking fetched successfully",
+
+        booking,
+      };
+    } catch (error) {
+      console.error(
+        "GET INDIVIDUAL BOOKING ERROR:",
+        error
+      );
+
       return {
         success: false,
-        message: "Booking not found",
+        message: error.message,
       };
     }
+  };
 
-    return {
-      success: true,
-      message: "Booking fetched successfully",
-      booking,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.message,
-    };
-  }
-};
-
-
+// =====================================================
 // GET BOOKINGS OF ONE USER
+// =====================================================
 
-const getUserBookingsData = async (userId) => {
-  try {
-    const bookings =
-      await BookTicketModel.find({
-        userId,
-      })
-        .sort({ createdAt: -1 })
-        .lean();
+const getUserBookingsData =
+  async (userId) => {
+    try {
+      const bookings =
+        await BookTicketModel.find({
+          userId,
+        })
+          .sort({ createdAt: -1 })
+          .lean();
 
-    return {
-      success: true,
-      message: "User bookings fetched successfully",
-      bookings,
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.message,
-    };
-  }
-};
+      return {
+        success: true,
 
+        message:
+          "User bookings fetched successfully",
+
+        bookings,
+      };
+    } catch (error) {
+      console.error(
+        "GET USER BOOKINGS ERROR:",
+        error
+      );
+
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+  };
+
+// =====================================================
+// EXPORT
+// =====================================================
 
 module.exports = {
   createBookingData,
+
   getBookingsData,
+
   getIndividualBookingData,
+
   getUserBookingsData,
 };
