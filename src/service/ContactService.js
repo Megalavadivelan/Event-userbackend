@@ -1,13 +1,7 @@
 const ContactModel = require("../model/ContactModel");
 
-
-// =====================================================
-// POST - SEND CONTACT MESSAGE
-// =====================================================
-
 const sendContactMessageData = async (body) => {
   try {
-
     const {
       name,
       email,
@@ -16,22 +10,12 @@ const sendContactMessageData = async (body) => {
       userId,
     } = body;
 
-
-    // =================================================
-    // VALIDATE FIELDS
-    // =================================================
-
     if (!name || !email || !subject || !message) {
       return {
         success: false,
         message: "All fields are required",
       };
     }
-
-
-    // =================================================
-    // SAVE CONTACT MESSAGE
-    // =================================================
 
     const contact = await ContactModel.create({
       userId: userId || null,
@@ -41,15 +25,13 @@ const sendContactMessageData = async (body) => {
       message,
     });
 
-
     return {
       success: true,
       message: "Message sent successfully",
-      contact: contact,
+      contact,
     };
 
   } catch (error) {
-
     console.error(
       "CONTACT SERVICE ERROR:",
       error
@@ -64,16 +46,14 @@ const sendContactMessageData = async (body) => {
 
 
 // =====================================================
-// GET - ALL CONTACT MESSAGES
+// GET CONTACTS
 // =====================================================
 
 const getContactsData = async () => {
   try {
-
     const contacts = await ContactModel.find({})
       .sort({ createdAt: -1 })
       .lean();
-
 
     return {
       success: true,
@@ -82,9 +62,8 @@ const getContactsData = async () => {
     };
 
   } catch (error) {
-
     console.error(
-      "GET CONTACT SERVICE ERROR:",
+      "GET CONTACTS SERVICE ERROR:",
       error
     );
 

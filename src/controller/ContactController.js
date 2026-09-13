@@ -1,17 +1,14 @@
 const ContactService = require("../service/ContactService");
 
-
 // =====================================================
-// POST - SEND CONTACT MESSAGE
+// POST CONTACT MESSAGE
 // =====================================================
 
 const sendContactMessage = async (req, res) => {
   try {
-
-    const result =
-      await ContactService.sendContactMessageData(
-        req.body
-      );
+    const result = await ContactService.sendContactMessageData(
+      req.body
+    );
 
     if (result.success) {
       return res.status(201).json(result);
@@ -20,11 +17,7 @@ const sendContactMessage = async (req, res) => {
     return res.status(400).json(result);
 
   } catch (error) {
-
-    console.error(
-      "CONTACT CONTROLLER ERROR:",
-      error
-    );
+    console.error("CONTACT POST ERROR:", error);
 
     return res.status(500).json({
       success: false,
@@ -35,12 +28,11 @@ const sendContactMessage = async (req, res) => {
 
 
 // =====================================================
-// GET - ALL CONTACT MESSAGES
+// GET ALL CONTACT MESSAGES
 // =====================================================
 
 const getContacts = async (req, res) => {
   try {
-
     const result =
       await ContactService.getContactsData();
 
@@ -51,11 +43,7 @@ const getContacts = async (req, res) => {
     return res.status(400).json(result);
 
   } catch (error) {
-
-    console.error(
-      "GET CONTACT ERROR:",
-      error
-    );
+    console.error("CONTACT GET ERROR:", error);
 
     return res.status(500).json({
       success: false,
