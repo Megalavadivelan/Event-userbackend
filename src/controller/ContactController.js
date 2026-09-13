@@ -1,38 +1,30 @@
-const ContactModel = require("../model/ContactModel");
+const ContactService = require("../service/ContactService");
+
+
+// =====================================================
+// POST - SEND CONTACT MESSAGE
+// =====================================================
 
 const sendContactMessage = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      subject,
-      message,
-      userId,
-    } = req.body;
 
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
+    const result =
+      await ContactService.sendContactMessageData(
+        req.body
+      );
+
+    if (result.success) {
+      return res.status(201).json(result);
     }
 
-    const contact = await ContactModel.create({
-      userId: userId || null,
-      name,
-      email,
-      subject,
-      message,
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: "Message sent successfully",
-      contact,
-    });
+    return res.status(400).json(result);
 
   } catch (error) {
-    console.error("CONTACT ERROR:", error);
+
+    console.error(
+      "CONTACT CONTROLLER ERROR:",
+      error
+    );
 
     return res.status(500).json({
       success: false,
@@ -41,6 +33,43 @@ const sendContactMessage = async (req, res) => {
   }
 };
 
+
+// =====================================================
+// GET - ALL CONTACT MESSAGES
+// =====================================================
+
+const getContacts = async (req, res) => {
+  try {
+
+    const result =
+      await ContactService.getContactsData();
+
+    if (result.success) {
+      return res.status(200).json(result);
+    }
+
+    return res.status(400).json(result);
+
+  } catch (error) {
+
+    console.error(
+      "GET CONTACT ERROR:",
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+// =====================================================
+// EXPORT
+// =====================================================
+
 module.exports = {
   sendContactMessage,
+  getContacts,
 };
