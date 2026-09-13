@@ -10,14 +10,14 @@ require("dotenv").config();
 
 const SignupRouter = require("./src/router/SignupRouter");
 const LoginRouter = require("./src/router/LoginRouter");
-const LoginHistoryRouter = require("./src/router/LoginHistoryRouter")
+const LoginHistoryRouter = require("./src/router/LoginHistoryRouter");
 const AdminRouter = require("./src/router/AdminRouter");
 const EventRouter = require("./src/router/EventRouter");
 const ProfileRouter = require("./src/router/ProfileRouter");
 const ContactRouter = require("./src/router/ContactRouter");
 const OrganizereqRouter = require("./src/router/OrganizereqRouter");
 const BookingRouter = require("./src/router/BookingsRouter");
-const BookTicketRouter = require("./src/router/BookTicketRouter")
+const BookTicketRouter = require("./src/router/BookTicketRouter");
 
 const app = express();
 
@@ -94,7 +94,6 @@ app.use(
 
 const connectDB = async () => {
   try {
-    // Already connected
     if (mongoose.connection.readyState === 1) {
       return;
     }
@@ -164,12 +163,17 @@ app.use(
   OrganizereqRouter
 );
 
+// =====================================================
+// BOOKING ROUTES
+// =====================================================
+
 app.use("/booking", BookingRouter);
 
-app.use(
-  "/bookticket",
-  BookTicketRouter
-);
+// =====================================================
+// BOOK TICKET ROUTES
+// =====================================================
+
+app.use("/bookticket", BookTicketRouter);
 
 // =====================================================
 // HOME ROUTE
@@ -182,14 +186,16 @@ app.get("/", (req, res) => {
   });
 });
 
+// =====================================================
+// TEST CONTACT
+// =====================================================
 
 app.get("/test-contact", (req, res) => {
   res.json({
     success: true,
-    message: "Contact route is working"
+    message: "Contact route is working",
   });
 });
-
 
 // =====================================================
 // 404 ROUTE
