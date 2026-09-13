@@ -176,6 +176,15 @@ app.get("/", (req, res) => {
   });
 });
 
+
+app.get("/test-contact", (req, res) => {
+  res.json({
+    success: true,
+    message: "Contact route is working"
+  });
+});
+
+
 // =====================================================
 // 404 ROUTE
 // =====================================================
