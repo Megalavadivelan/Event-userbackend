@@ -1,8 +1,8 @@
 const OrganizereqModel = require("../model/OrganizereqModel");
 
-// =====================================================
-// POST ORGANIZER REQUEST
-// =====================================================
+// *=====================================================*
+// *POST ORGANIZER REQUEST*
+// *=====================================================*
 
 const createOrganizerRequestData = async (body) => {
   try {
@@ -12,28 +12,32 @@ const createOrganizerRequestData = async (body) => {
       phone,
       eventName,
       description,
-      date,
+      eventDate,
       location,
       expectedParticipants,
       category,
-      budget,
+      ticketFee,
+      estimatedBudget,
     } = body;
 
+    // Required fields
     if (
       !organizerName ||
       !email ||
       !phone ||
       !eventName ||
       !description ||
-      !date ||
+      !eventDate ||
       !location ||
       !expectedParticipants ||
       !category ||
-      !budget
+      ticketFee === undefined ||
+      ticketFee === null ||
+      ticketFee === ""
     ) {
       return {
         success: false,
-        message: "All fields are required",
+        message: "All required fields must be filled",
       };
     }
 
@@ -43,11 +47,16 @@ const createOrganizerRequestData = async (body) => {
       phone,
       eventName,
       description,
-      date,
+      eventDate,
       location,
       expectedParticipants,
       category,
-      budget,
+      ticketFee,
+      estimatedBudget:
+        estimatedBudget === "" ||
+        estimatedBudget === undefined
+          ? null
+          : estimatedBudget,
     });
 
     return {
@@ -55,7 +64,6 @@ const createOrganizerRequestData = async (body) => {
       message: "Organizer request submitted successfully",
       request,
     };
-
   } catch (error) {
     console.error(
       "ORGANIZER REQUEST POST ERROR:",
@@ -69,24 +77,21 @@ const createOrganizerRequestData = async (body) => {
   }
 };
 
-
-// =====================================================
-// GET ALL ORGANIZER REQUESTS
-// =====================================================
+// *=====================================================*
+// *GET ALL ORGANIZER REQUESTS*
+// *=====================================================*
 
 const getOrganizerRequestsData = async () => {
   try {
-    const requests =
-      await OrganizereqModel.find({})
-        .sort({ createdAt: -1 })
-        .lean();
+    const requests = await OrganizereqModel.find({})
+      .sort({ createdAt: -1 })
+      .lean();
 
     return {
       success: true,
       message: "Organizer requests fetched successfully",
       requests: requests,
     };
-
   } catch (error) {
     console.error(
       "GET ORGANIZER REQUESTS ERROR:",
@@ -100,17 +105,15 @@ const getOrganizerRequestsData = async () => {
   }
 };
 
-
-// =====================================================
-// GET INDIVIDUAL ORGANIZER REQUEST
-// =====================================================
+// *=====================================================*
+// *GET INDIVIDUAL ORGANIZER REQUEST*
+// *=====================================================*
 
 const getIndividualOrganizerRequestData = async (id) => {
   try {
-    const request =
-      await OrganizereqModel
-        .findById(id)
-        .lean();
+    const request = await OrganizereqModel
+      .findById(id)
+      .lean();
 
     if (!request) {
       return {
@@ -124,7 +127,6 @@ const getIndividualOrganizerRequestData = async (id) => {
       message: "Organizer request fetched successfully",
       request: request,
     };
-
   } catch (error) {
     console.error(
       "GET INDIVIDUAL ORGANIZER REQUEST ERROR:",
@@ -138,10 +140,9 @@ const getIndividualOrganizerRequestData = async (id) => {
   }
 };
 
-
-// =====================================================
-// EXPORT
-// =====================================================
+// *=====================================================*
+// *EXPORT*
+// *=====================================================*
 
 module.exports = {
   createOrganizerRequestData,
