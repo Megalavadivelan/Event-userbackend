@@ -43,8 +43,16 @@ const app = express();
 // =====================================================
 
 const allowedOrigins = [
+  // USER FRONTEND
   "https://event-user-one.vercel.app",
+
+  // SECOND USER FRONTEND
   "https://eventuser-two.vercel.app",
+
+  // ADMIN FRONTEND
+  "https://event-admin-one.vercel.app",
+
+  // LOCAL DEVELOPMENT
   "http://localhost:5173",
   "http://localhost:5174",
 ];
@@ -52,14 +60,15 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Thunder Client / Postman / server requests
+
+      // Allow requests without an Origin
+      // Example: Postman / Thunder Client
       if (!origin) {
         return callback(null, true);
       }
 
-      if (
-        allowedOrigins.includes(origin)
-      ) {
+      // Allow registered frontend origins
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
@@ -69,7 +78,9 @@ app.use(
       );
 
       return callback(
-        new Error("Not allowed by CORS")
+        new Error(
+          `Not allowed by CORS: ${origin}`
+        )
       );
     },
 
@@ -125,6 +136,7 @@ app.use(
 
 const connectDB = async () => {
   try {
+
     if (
       mongoose.connection.readyState === 1
     ) {
@@ -140,14 +152,19 @@ const connectDB = async () => {
       );
     }
 
-    await mongoose.connect(MONGO_URI, {
-      serverSelectionTimeoutMS: 10000,
-    });
+    await mongoose.connect(
+      MONGO_URI,
+      {
+        serverSelectionTimeoutMS: 10000,
+      }
+    );
 
     console.log(
       "MongoDB connected successfully"
     );
+
   } catch (error) {
+
     console.error(
       "MongoDB connection error:",
       error.message
@@ -163,15 +180,21 @@ const connectDB = async () => {
 
 app.use(
   async (req, res, next) => {
+
     try {
+
       await connectDB();
+
       next();
+
     } catch (error) {
+
       return res.status(500).json({
         success: false,
         message:
           "Database connection failed.",
       });
+
     }
   }
 );
@@ -221,7 +244,7 @@ app.use(
 );
 
 // =====================================================
-// BOOKING ROUTE
+// BOOKING ROUTES
 // =====================================================
 
 app.use(
@@ -236,11 +259,13 @@ app.use(
 app.get(
   "/",
   (req, res) => {
+
     res.status(200).json({
       success: true,
       message:
         "Event Management Backend is running.",
     });
+
   }
 );
 
@@ -251,11 +276,13 @@ app.get(
 app.get(
   "/test-booking",
   (req, res) => {
+
     res.status(200).json({
       success: true,
       message:
         "Booking route is working.",
     });
+
   }
 );
 
@@ -266,11 +293,13 @@ app.get(
 app.get(
   "/test-contact",
   (req, res) => {
+
     res.json({
       success: true,
       message:
         "Contact route is working.",
     });
+
   }
 );
 
@@ -280,11 +309,14 @@ app.get(
 
 app.use(
   (req, res) => {
+
     res.status(404).json({
       success: false,
-      message: "Route not found",
+      message:
+        "Route not found",
       path: req.originalUrl,
     });
+
   }
 );
 
@@ -293,15 +325,18 @@ app.use(
 // =====================================================
 
 if (require.main === module) {
+
   const PORT =
     process.env.PORT || 2005;
 
   app.listen(
     PORT,
     () => {
+
       console.log(
         `Server running on port ${PORT}`
       );
+
     }
   );
 }
