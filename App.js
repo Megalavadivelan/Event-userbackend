@@ -8,7 +8,7 @@ require("dotenv").config();
 // =====================================================
 // ROUTERS
 // =====================================================
-
+const GoogleAuthRouter = require("./src/router/GoogleAuthRouter");
 const SignupRouter =
   require("./src/router/SignupRouter");
 
@@ -129,7 +129,7 @@ app.use(
     path.join(__dirname, "uploads")
   )
 );
-
+app.use("/auth", GoogleAuthRouter);
 // =====================================================
 // MONGODB CONNECTION
 // =====================================================

@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const SignupSchema = new mongoose.Schema(
@@ -18,7 +19,12 @@ const SignupSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      default: null,
+    },
+
+    googleId: {
+      type: String,
+      default: null,
     },
 
     role: {
@@ -42,7 +48,4 @@ const SignupSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model(
-  "Signup",
-  SignupSchema
-);
+module.exports = mongoose.model("Signup", SignupSchema);
