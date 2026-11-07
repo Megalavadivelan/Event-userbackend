@@ -33,6 +33,7 @@ const allowedOrigins = [
   "https://event-admin-one.vercel.app",
   "http://localhost:5173",
   "http://localhost:5174",
+  "https://userapi-alpha-nine.vercel.app/"
 ];
 
 const corsOptions = {
