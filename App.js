@@ -133,7 +133,12 @@ app.use(async (req, res, next) => {
 // =====================================================
 // ROUTES
 // =====================================================
-
+app.get("/auth/test", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Google Auth Router is mounted successfully"
+  });
+});
 app.use("/auth", GoogleAuthRouter);
 
 app.use("/signup", SignupRouter);
