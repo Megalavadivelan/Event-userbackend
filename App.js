@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -8,109 +9,71 @@ require("dotenv").config();
 // =====================================================
 // ROUTERS
 // =====================================================
+
 const GoogleAuthRouter = require("./src/router/GoogleAuthRouter");
-const SignupRouter =
-  require("./src/router/SignupRouter");
-
-const LoginRouter =
-  require("./src/router/LoginRouter");
-
-const LoginHistoryRouter =
-  require("./src/router/LoginHistoryRouter");
-
-const AdminRouter =
-  require("./src/router/AdminRouter");
-
-const EventRouter =
-  require("./src/router/EventRouter");
-
-const ProfileRouter =
-  require("./src/router/ProfileRouter");
-
-const ContactRouter =
-  require("./src/router/ContactRouter");
-
-const OrganizereqRouter =
-  require("./src/router/OrganizereqRouter");
-
-const BookTicketRouter =
-  require("./src/router/BookTicketRouter");
+const SignupRouter = require("./src/router/SignupRouter");
+const LoginRouter = require("./src/router/LoginRouter");
+const LoginHistoryRouter = require("./src/router/LoginHistoryRouter");
+const AdminRouter = require("./src/router/AdminRouter");
+const EventRouter = require("./src/router/EventRouter");
+const ProfileRouter = require("./src/router/ProfileRouter");
+const ContactRouter = require("./src/router/ContactRouter");
+const OrganizereqRouter = require("./src/router/OrganizereqRouter");
+const BookTicketRouter = require("./src/router/BookTicketRouter");
 
 const app = express();
 
 // =====================================================
-// CORS
+// CORS CONFIGURATION
 // =====================================================
 
 const allowedOrigins = [
-  // USER FRONTEND
   "https://event-user-one.vercel.app",
-
-  // SECOND USER FRONTEND
   "https://eventuser-two.vercel.app",
-
-  // ADMIN FRONTEND
   "https://event-admin-one.vercel.app",
-
-  // LOCAL DEVELOPMENT
   "http://localhost:5173",
   "http://localhost:5174",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-      // Allow requests without an Origin
-      // Example: Postman / Thunder Client
-      if (!origin) {
-        return callback(null, true);
-      }
+    console.log("CORS blocked origin:", origin);
 
-      // Allow registered frontend origins
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    return callback(new Error("Not allowed by CORS"));
+  },
 
-      console.log(
-        "CORS blocked origin:",
-        origin
-      );
+  credentials: true,
 
-      return callback(
-        new Error(
-          `Not allowed by CORS: ${origin}`
-        )
-      );
-    },
+  methods: [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+  ],
 
-    credentials: true,
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
+};
 
-    methods: [
-      "GET",
-      "POST",
-      "PUT",
-      "PATCH",
-      "DELETE",
-      "OPTIONS",
-    ],
+// CORS must execute before all routes and database middleware.
+app.use(cors(corsOptions));
 
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-    ],
-  })
-);
+// Explicitly handle preflight requests.
+app.options(/.*/, cors(corsOptions));
 
 // =====================================================
 // BODY PARSER
 // =====================================================
 
-app.use(
-  express.json({
-    limit: "10mb",
-  })
-);
+app.use(express.json({ limit: "10mb" }));
 
 app.use(
   express.urlencoded({
@@ -125,220 +88,114 @@ app.use(
 
 app.use(
   "/uploads",
-  express.static(
-    path.join(__dirname, "uploads")
-  )
+  express.static(path.join(__dirname, "uploads"))
 );
-app.use("/auth", GoogleAuthRouter);
+
 // =====================================================
 // MONGODB CONNECTION
 // =====================================================
 
 const connectDB = async () => {
-  try {
-
-    if (
-      mongoose.connection.readyState === 1
-    ) {
-      return;
-    }
-
-    const MONGO_URI =
-      process.env.MONGO_URI;
-
-    if (!MONGO_URI) {
-      throw new Error(
-        "MONGO_URI is not defined"
-      );
-    }
-
-    await mongoose.connect(
-      MONGO_URI,
-      {
-        serverSelectionTimeoutMS: 10000,
-      }
-    );
-
-    console.log(
-      "MongoDB connected successfully"
-    );
-
-  } catch (error) {
-
-    console.error(
-      "MongoDB connection error:",
-      error.message
-    );
-
-    throw error;
+  if (mongoose.connection.readyState === 1) {
+    return;
   }
+
+  if (!process.env.MONGO_URI) {
+    throw new Error("MONGO_URI is not defined");
+  }
+
+  await mongoose.connect(process.env.MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+  });
+
+  console.log("MongoDB connected successfully");
 };
 
 // =====================================================
 // DATABASE MIDDLEWARE
 // =====================================================
 
-app.use(
-  async (req, res, next) => {
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    console.error("MongoDB connection error:", error.message);
 
-    try {
-
-      await connectDB();
-
-      next();
-
-    } catch (error) {
-
-      return res.status(500).json({
-        success: false,
-        message:
-          "Database connection failed.",
-      });
-
-    }
+    return res.status(500).json({
+      success: false,
+      message: "Database connection failed.",
+    });
   }
-);
+});
 
 // =====================================================
 // ROUTES
 // =====================================================
 
-app.use(
-  "/signup",
-  SignupRouter
-);
+app.use("/auth", GoogleAuthRouter);
 
-app.use(
-  "/login",
-  LoginRouter
-);
-
-app.use(
-  "/loginhistory",
-  LoginHistoryRouter
-);
-
-app.use(
-  "/admin",
-  AdminRouter
-);
-
-app.use(
-  "/events",
-  EventRouter
-);
-
-app.use(
-  "/profile",
-  ProfileRouter
-);
-
-app.use(
-  "/contact",
-  ContactRouter
-);
-
-app.use(
-  "/organizer-requests",
-  OrganizereqRouter
-);
-
-// =====================================================
-// BOOKING ROUTES
-// =====================================================
-
-app.use(
-  "/booking",
-  BookTicketRouter
-);
+app.use("/signup", SignupRouter);
+app.use("/login", LoginRouter);
+app.use("/loginhistory", LoginHistoryRouter);
+app.use("/admin", AdminRouter);
+app.use("/events", EventRouter);
+app.use("/profile", ProfileRouter);
+app.use("/contact", ContactRouter);
+app.use("/organizer-requests", OrganizereqRouter);
+app.use("/booking", BookTicketRouter);
 
 // =====================================================
 // HOME
 // =====================================================
 
-app.get(
-  "/",
-  (req, res) => {
-
-    res.status(200).json({
-      success: true,
-      message:
-        "Event Management Backend is running.",
-    });
-
-  }
-);
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Event Management Backend is running.",
+  });
+});
 
 // =====================================================
-// TEST BOOKING ROUTE
+// TEST ROUTES
 // =====================================================
 
-app.get(
-  "/test-booking",
-  (req, res) => {
+app.get("/test-booking", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Booking route is working.",
+  });
+});
 
-    res.status(200).json({
-      success: true,
-      message:
-        "Booking route is working.",
-    });
-
-  }
-);
-
-// =====================================================
-// TEST CONTACT
-// =====================================================
-
-app.get(
-  "/test-contact",
-  (req, res) => {
-
-    res.json({
-      success: true,
-      message:
-        "Contact route is working.",
-    });
-
-  }
-);
+app.get("/test-contact", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Contact route is working.",
+  });
+});
 
 // =====================================================
 // 404
 // =====================================================
 
-app.use(
-  (req, res) => {
-
-    res.status(404).json({
-      success: false,
-      message:
-        "Route not found",
-      path: req.originalUrl,
-    });
-
-  }
-);
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+    path: req.originalUrl,
+  });
+});
 
 // =====================================================
 // LOCAL SERVER
 // =====================================================
 
 if (require.main === module) {
+  const PORT = process.env.PORT || 2005;
 
-  const PORT =
-    process.env.PORT || 2005;
-
-  app.listen(
-    PORT,
-    () => {
-
-      console.log(
-        `Server running on port ${PORT}`
-      );
-
-    }
-  );
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 }
 
 // =====================================================
